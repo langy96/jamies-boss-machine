@@ -1,28 +1,23 @@
+// meetings.js
 const express = require('express');
-const meetingsRouter = express.Router();
-
-const {
-  getAllFromDatabase,
-  addToDatabase,
-  deleteAllFromDatabase,
-  createMeeting
-} = require('./db');
+const router = express.Router();
+const db = require('../db');
 
 // GET all
-meetingsRouter.get('/', (req, res) => {
-  res.send(getAllFromDatabase('meetings'));
+router.get('/', (req, res) => {
+  res.send(db.getAllMeetings());
 });
 
 // POST (auto-create)
-meetingsRouter.post('/', (req, res) => {
-  const meeting = addToDatabase('meetings', createMeeting());
+router.post('/', (req, res) => {
+  const meeting = db.addMeeting({ name: 'New Meeting', time: '12:00' });
   res.status(201).send(meeting);
 });
 
 // DELETE all
-meetingsRouter.delete('/', (req, res) => {
-  deleteAllFromDatabase('meetings');
+router.delete('/', (req, res) => {
+  db.deleteAllMeetings();
   res.sendStatus(204);
 });
 
-module.exports = meetingsRouter;
+module.exports = router;
