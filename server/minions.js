@@ -1,38 +1,54 @@
-// minions.js
+// server/minions.js
 const express = require('express');
 const router = express.Router();
-const db = require('../db');
+const db = require('./db'); // same folder
 
-// GET all
+// GET all minions
 router.get('/', (req, res) => {
-  res.send(db.getAllMinions());
+  res.send(db.getAllFromDatabase('minions'));
 });
 
-// POST
+// POST a new minion
 router.post('/', (req, res) => {
-  const newMinion = db.addMinion(req.body);
-  res.status(201).send(newMinion);
+  const newMinion = {
+    id: String(Date.now()), // unique ID
+    name: req.body.name || '',
+    title: req.body.title || '',
+    weaknesses: req.body.weaknesses || '',
+    salary: req.body.salary || 0,
+  };
+  const addedMinion = db.addToDatabase('minions', newMinion);
+  res.status(201).send(addedMinion);
 });
 
-// GET by id
+// GET minion by ID
 router.get('/:minionId', (req, res) => {
-  const minion = db.getMinionById(Number(req.params.minionId));
+  const minion = db.getFromDatabaseById('minions', req.params.minionId);
   if (!minion) return res.sendStatus(404);
   res.send(minion);
 });
 
-// PUT
+// PUT (update) minion
 router.put('/:minionId', (req, res) => {
-  const id = Number(req.params.minionId);
+  const id = req.params.minionId;
   if (req.body.id !== id) return res.sendStatus(400);
-  const updated = db.updateMinion(id, req.body);
-  if (!updated) return res.sendStatus(404);
-  res.send(updated);
+
+  const updatedMinion = {
+    id,
+    name: req.body.name || '',
+    title: req.body.title || '',
+    weaknesses: req.body.weaknesses || '',
+    salary: req.body.salary || 0,
+  };
+
+  const result = db.updateInstanceInDatabase('minions', updatedMinion);
+  if (!result) return res.sendStatus(404);
+  res.send(result);
 });
 
-// DELETE
+// DELETE minion
 router.delete('/:minionId', (req, res) => {
-  const deleted = db.deleteMinion(Number(req.params.minionId));
+  const deleted = db.deleteFromDatabasebyId('minions', req.params.minionId);
   if (!deleted) return res.sendStatus(404);
   res.sendStatus(204);
 });

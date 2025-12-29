@@ -1,22 +1,29 @@
-// meetings.js
+// server/meetings.js
 const express = require('express');
 const router = express.Router();
-const db = require('../db');
+const db = require('./db'); // same folder
 
-// GET all
+// GET all meetings
 router.get('/', (req, res) => {
-  res.send(db.getAllMeetings());
+  res.send(db.getAllFromDatabase('meetings'));
 });
 
-// POST (auto-create)
+// POST a new meeting (auto-create)
 router.post('/', (req, res) => {
-  const meeting = db.addMeeting({ name: 'New Meeting', time: '12:00' });
+  const newMeeting = {
+    id: String(Date.now()), // simple unique ID
+    time: '12:00',
+    date: new Date().toISOString().split('T')[0],
+    day: new Date().toLocaleString('en-US', { weekday: 'long' }),
+    note: 'New meeting note',
+  };
+  const meeting = db.addToDatabase('meetings', newMeeting);
   res.status(201).send(meeting);
 });
 
-// DELETE all
+// DELETE all meetings
 router.delete('/', (req, res) => {
-  db.deleteAllMeetings();
+  db.db.meetings = []; // clear the array directly
   res.sendStatus(204);
 });
 

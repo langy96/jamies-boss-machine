@@ -1,39 +1,40 @@
-// ideas.js
+// server/ideas.js
 const express = require('express');
 const router = express.Router();
-const db = require('../db');
-const checkMillionDollarIdea = require('../checkMillionDollarIdea');
+const db = require('./db'); // Correct path since both files are in server/
+const checkMillionDollarIdea = require('./checkMillionDollarIdea');
 
-// GET all
+// GET all ideas
 router.get('/', (req, res) => {
-  res.send(db.getAllIdeas());
+  res.send(db.getAllFromDatabase('ideas'));
 });
 
-// POST
+// POST a new idea
 router.post('/', checkMillionDollarIdea, (req, res) => {
-  const idea = db.addIdea(req.body);
+  const idea = db.addToDatabase('ideas', req.body);
   res.status(201).send(idea);
 });
 
-// GET by id
+// GET idea by id
 router.get('/:ideaId', (req, res) => {
-  const idea = db.getIdeaById(Number(req.params.ideaId));
+  const idea = db.getFromDatabaseById('ideas', req.params.ideaId);
   if (!idea) return res.sendStatus(404);
   res.send(idea);
 });
 
-// PUT
+// PUT / update idea
 router.put('/:ideaId', checkMillionDollarIdea, (req, res) => {
-  const id = Number(req.params.ideaId);
+  const id = req.params.ideaId;
   if (req.body.id !== id) return res.sendStatus(400);
-  const updated = db.updateIdea(id, req.body);
+
+  const updated = db.updateInstanceInDatabase('ideas', req.body);
   if (!updated) return res.sendStatus(404);
   res.send(updated);
 });
 
-// DELETE
+// DELETE idea
 router.delete('/:ideaId', (req, res) => {
-  const deleted = db.deleteIdea(Number(req.params.ideaId));
+  const deleted = db.deleteFromDatabasebyId('ideas', req.params.ideaId);
   if (!deleted) return res.sendStatus(404);
   res.sendStatus(204);
 });
